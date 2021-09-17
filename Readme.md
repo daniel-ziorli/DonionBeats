@@ -5,20 +5,22 @@ Simple python music bot for discord. Features a queue system then ability to pau
 ## Install
 
 Run the setup
+
 `make`
 
 Youll need to enter your bots token which can be found at https://discord.com/developers/applications/
 
 Then run it with
+
 `make run`
 
 Options
 
 `
--play
--stop
--queue
--reset
--join
--leave
+-play \
+-stop \
+-queue \
+-reset \
+-join \
+-leave \
 `

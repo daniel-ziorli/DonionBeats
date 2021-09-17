@@ -10,7 +10,9 @@ Run the setup
 
 Youll need to enter your bots token which can be found at https://discord.com/developers/applications/
 
-Then run it with
+## Run
+
+Run it with
 
 `make run`
 

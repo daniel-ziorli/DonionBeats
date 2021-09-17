@@ -12,6 +12,8 @@ for i in range(len(cogs)):
 
 token = os.environ.get('TOKEN')
 if token == None:
-    print("run the setup proccess with 'make'")
+    print("Go to https://discord.com/developers/applications select your bot and get your token")
+    print("Use export command to set the TOKEN enviroment variable")
+    print("Example: export TOKEN=MY-DISCORD-BOT-TOKEN")
     exit()
 client.run(os.environ.get('TOKEN'))

@@ -16,11 +16,11 @@ Then run it with
 
 Options
 
-`
--play \
--stop \
--queue \
--reset \
--join \
--leave \
-`
+```
+-play
+-stop
+-queue
+-reset
+-join
+-leave
+```

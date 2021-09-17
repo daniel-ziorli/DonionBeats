@@ -3,6 +3,7 @@ from discord.ext import commands
 from yt_dlp import YoutubeDL
 import time
 import threading
+import validators
 
 class Song():
     def __init__(self, title, source):
@@ -62,9 +63,12 @@ class music(commands.Cog):
         self.playingQueue = False
         self.FFMPEG_OPTIONS = {
             'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
-            'options': '-vn'
+            'options': '-vn',
         }
-        self.YDL_OPTIONS = {'format': 'bestaudio'}
+        self.YDL_OPTIONS = {
+            'format': 'bestaudio/best',
+            'noplaylist' : 'True',
+        }
 
     @commands.command()
     async def join(self, ctx):
@@ -96,16 +100,14 @@ class music(commands.Cog):
 
         with YoutubeDL(self.YDL_OPTIONS) as ydl:
             info = None
-            print(url[:len(self.prefix)])
-            if len(url) < len(self.prefix) or url[:len(self.prefix)] != self.prefix:
-                info = ydl.extract_info(f"ytsearch:{url}", download=False)[
-                    'entries'][0]
-            else:
-                try:
+            try:
+                if validators.url(url):
                     info = ydl.extract_info(url, download=False)
-                except:
-                    await self.send(ctx, "Cant find the video you chimp")
-                    return
+                else:
+                    info = ydl.extract_info(f"ytsearch:{url}", download=False)['entries'][0]
+            except:
+                await self.send(ctx, "Cant find the your video monkey")
+                return
 
             source = await discord.FFmpegOpusAudio.from_probe(info['formats'][0]['url'], **self.FFMPEG_OPTIONS)
             self.music_queue.addSong(Song(info['title'], source))

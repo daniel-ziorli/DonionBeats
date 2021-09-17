@@ -15,6 +15,7 @@ class SongQueue():
     def __init__(self):
         self.queue = []
         self.currently_playing = None
+        self.is_paused = True
 
     def addSong(self, song):
         return self.queue.append(song)
@@ -34,7 +35,12 @@ class SongQueue():
     def getLength(self):
         return len(self.queue)
 
+    def reset(self):
+        self.queue = []
+        self.currently_playing = None
+
     def __str__(self):
+        print (self.queue)
         if self.isEmpty():
             return "Queue is empty bimbo"
 
@@ -53,8 +59,6 @@ class music(commands.Cog):
         self.client = client
         self.prefix = 'https://www.youtube.com/'
         self.music_queue = SongQueue()
-        self.ctx = None
-        self.inactivity_timeout = 5
 
         self.playingQueue = False
         self.FFMPEG_OPTIONS = {
@@ -79,14 +83,16 @@ class music(commands.Cog):
         if ctx.voice_client is None:
             return
 
+        self.music_queue.reset()
         await ctx.voice_client.disconnect()
 
     @commands.command()
     async def play(self, ctx, *url):
         await self.join(ctx)
         url = ' '.join([str(elem) for elem in url])
+        self.music_queue.is_paused = False
         if len(url) == 0:
-            await self.resume(ctx)
+            ctx.voice_client.resume()
             return
 
         with YoutubeDL(self.YDL_OPTIONS) as ydl:
@@ -120,13 +126,17 @@ class music(commands.Cog):
                 thread.start()
 
     def startPlaying(self, ctx):
-        while not self.music_queue.isEmpty() or ctx.voice_client.is_playing():
+        current_song = None
+        while not self.music_queue.isEmpty() or (ctx.voice_client is not None and ctx.voice_client.is_playing()):
+            if ctx.voice_client is None:
+                break
             if ctx.voice_client.is_playing():
+                self.music_queue.currently_playing = current_song
                 time.sleep(1)
-            else:
+            elif not self.music_queue.is_paused:
                 print("next song")
-                song = self.music_queue.nextSong()
-                ctx.voice_client.play(song.source)
+                current_song = self.music_queue.nextSong()
+                ctx.voice_client.play(current_song.source)
 
         self.music_queue.currently_playing = None
 
@@ -157,25 +167,14 @@ class music(commands.Cog):
         if not ctx.voice_client.is_playing():
             return
 
-        ctx.voice_client.stop()
-
-    @commands.command()
-    async def pause(self, ctx):
-        if ctx.voice_client.is_playing():
-            return
-
-        self.ctx.voice_client.pause()
-
-    @commands.command()
-    async def resume(self, ctx):
-        if ctx.voice_client.is_paused():
-            return
-
-        ctx.voice_client.resume()
+        self.music_queue.is_paused = True
+        ctx.voice_client.pause()
 
     @commands.command()
     async def queue(self, ctx):
-        msg = "Playing: " + self.music_queue.currently_playing.title
+        msg = ""
+        if self.music_queue.currently_playing is not None:
+            msg += "Playing: " + self.music_queue.currently_playing.title
         msg += str(self.music_queue)
         await self.send(ctx, msg)
 
@@ -189,6 +188,12 @@ class music(commands.Cog):
         msg = "Removed: " + self.music_queue.removeSong(index).title
         msg += str(self.music_queue)
         await self.send(ctx, msg)
+
+    @commands.command()
+    async def reset(self, ctx):
+        ctx.voice_client.stop()
+        self.music_queue.reset()
+        await self.send(ctx, "Me reset now")
 
     async def send(self, ctx, msg):
         await ctx.send("```" + msg + "```")

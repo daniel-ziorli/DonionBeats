@@ -12,6 +12,6 @@ for i in range(len(cogs)):
 
 token = os.environ.get('TOKEN')
 if token == None:
-    print("set your token with 'export TOKEN=VALUE'")
+    print("run the setup proccess with 'make'")
     exit()
 client.run(os.environ.get('TOKEN'))

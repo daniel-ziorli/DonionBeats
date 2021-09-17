@@ -40,7 +40,6 @@ class SongQueue():
         self.currently_playing = None
 
     def __str__(self):
-        print (self.queue)
         if self.isEmpty():
             return "Queue is empty bimbo"
 

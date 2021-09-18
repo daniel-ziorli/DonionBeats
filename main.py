@@ -27,7 +27,7 @@ except:
 
 token = None
 try:
-    token = data['TOKEN']
+    token = data["TOKEN"]
 except:
     print("Run 'make' command to set up your config")
     exit()
@@ -35,4 +35,6 @@ except:
 if token == "" or token == None:
     print("Run 'make' command to set up your config")
     exit()
-client.run(token)
+
+print(token)
+client.run(str(token))

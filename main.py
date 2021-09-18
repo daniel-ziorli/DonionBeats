@@ -35,4 +35,4 @@ except:
 if token == "" or token == None:
     print("Run 'make' command to set up your config")
     exit()
-client.run(os.environ.get('TOKEN'))
+client.run(token)

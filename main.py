@@ -36,5 +36,4 @@ if token == "" or token == None:
     print("Run 'make' command to set up your config")
     exit()
 
-print(token)
 client.run(str(token))

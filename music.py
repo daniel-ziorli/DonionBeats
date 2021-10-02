@@ -70,6 +70,8 @@ class music(commands.Cog):
             'noplaylist' : 'True',
         }
 
+        print('\nDonionBeats is online')
+
     @commands.command()
     async def join(self, ctx):
         if ctx.author.voice is None:
@@ -106,7 +108,7 @@ class music(commands.Cog):
                 else:
                     info = ydl.extract_info(f"ytsearch:{url}", download=False)['entries'][0]
             except:
-                await self.send(ctx, "Cant find the your video monkey")
+                await self.send(ctx, "Can not find the video monkey")
                 return
 
             source = await discord.FFmpegOpusAudio.from_probe(info['formats'][0]['url'], **self.FFMPEG_OPTIONS)
@@ -146,10 +148,10 @@ class music(commands.Cog):
         if not ctx.voice_client.is_playing():
             return
 
+        ctx.voice_client.stop()
+
         if self.music_queue.isEmpty():
             return
-
-        ctx.voice_client.stop()
 
         if self.music_queue.currently_playing is None:
             thread = threading.Thread(target=self.startPlaying, args=[ctx])
@@ -164,7 +166,7 @@ class music(commands.Cog):
         await self.send(ctx, msg)
 
     @commands.command()
-    async def stop(self, ctx):
+    async def pause(self, ctx):
         if not ctx.voice_client.is_playing():
             return
 
@@ -172,10 +174,19 @@ class music(commands.Cog):
         ctx.voice_client.pause()
 
     @commands.command()
+    async def stop(self, ctx):
+        if not ctx.voice_client.is_playing():
+            return
+
+        self.music_queue.is_paused = True
+        ctx.voice_client.stop()
+
+
+    @commands.command()
     async def queue(self, ctx):
         msg = ""
         if self.music_queue.currently_playing is not None:
-            msg += "Playing: " + self.music_queue.currently_playing.title
+            msg += "Playing: " + self.music_queue.currently_playing.title + "\n"
         msg += str(self.music_queue)
         await self.send(ctx, msg)
 

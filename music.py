@@ -11,7 +11,6 @@ class Song():
         self.source = source
         self.voice_client = None
 
-
 class SongQueue():
     def __init__(self):
         self.queue = []
@@ -59,6 +58,7 @@ class music(commands.Cog):
         self.client = client
         self.prefix = 'https://www.youtube.com/'
         self.music_queue = SongQueue()
+        self.bit_rate = 128
 
         self.playingQueue = False
         self.FFMPEG_OPTIONS = {
@@ -111,7 +111,8 @@ class music(commands.Cog):
                 await self.send(ctx, "Can not find the video monkey")
                 return
 
-            source = await discord.FFmpegOpusAudio.from_probe(info['formats'][0]['url'], **self.FFMPEG_OPTIONS)
+            source = discord.FFmpegOpusAudio(info['formats'][0]['url'], bitrate=self.bit_rate)
+            
             self.music_queue.addSong(Song(info['title'], source))
 
             msg = ""
@@ -203,9 +204,25 @@ class music(commands.Cog):
 
     @commands.command()
     async def reset(self, ctx):
-        ctx.voice_client.stop()
+        if ctx.voice_client:
+            ctx.voice_client.stop()
         self.music_queue.reset()
+        self.bit_rate = 128
         await self.send(ctx, "Me reset now")
+    
+    @commands.command()
+    async def quality(self, ctx, bitrate):
+        if bitrate == "reset":
+            self.bit_rate = 128
+        else:
+            self.bit_rate = int(bitrate)
+
+        if self.bit_rate <= 1:
+            self.bit_rate = 1
+        elif self.bit_rate >= 9999:
+            self.bit_rate = 9999
+        
+        await self.send(ctx, "Bitrate set to: " + str(self.bit_rate))
 
     async def send(self, ctx, msg):
         await ctx.send("```" + msg + "```")
